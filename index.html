@@ -25,6 +25,7 @@
     width: 90%;
     max-width: 350px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    z-index: 2;
   }
 
   h1 {
@@ -49,12 +50,12 @@
   .no {
     background: #ccc;
     position: absolute;
+    z-index: 3;
   }
 
   .result {
-    font-size: 22px;
+    font-size: 24px;
     color: #ff4d6d;
-    margin-top: 20px;
     display: none;
   }
 
@@ -66,25 +67,34 @@
     animation: floatUp 5s linear infinite;
   }
 
+  /* Sad emoji */
+  .sad {
+    position: fixed;
+    font-size: 26px;
+    animation: fadeUp 2.5s ease forwards;
+    z-index: 1;
+  }
+
   @keyframes floatUp {
-    from {
-      transform: translateY(0);
-      opacity: 1;
-    }
-    to {
-      transform: translateY(-110vh);
-      opacity: 0;
-    }
+    from { transform: translateY(0); opacity: 1; }
+    to { transform: translateY(-110vh); opacity: 0; }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-40px); }
   }
 </style>
 </head>
 
 <body>
 
-<div class="card">
-  <h1>Are you loving me? ❤️</h1>
-  <button class="yes" onclick="yesClicked()">YES</button>
-  <div id="result" class="result">I knew it 😍<br>I love you too ❤️</div>
+<div class="card" id="card">
+  <h1 id="question">Are you loving me? ❤️</h1>
+  <button class="yes" id="yesBtn" onclick="yesClicked()">YES</button>
+  <div id="result" class="result">
+    I know it 😍<br>I love you too ❤️❤️❤️
+  </div>
 </div>
 
 <button id="noBtn" class="no">NO</button>
@@ -92,20 +102,61 @@
 <script>
   const noBtn = document.getElementById("noBtn");
 
+  // Different sad emojis
+  const sadFaces = ["😢", "😭", "🥺", "😞", "💔"];
+
+  let sadEmojis = [];
+
   function moveNo() {
+    // Move NO button
     const x = Math.random() * (window.innerWidth - 100);
     const y = Math.random() * (window.innerHeight - 50);
     noBtn.style.left = x + "px";
     noBtn.style.top = y + "px";
-    noBtn.style.transform = `scale(${Math.random() * 0.5 + 0.5})`;
+    noBtn.style.transform = `scale(${Math.random() * 0.5 + 0.6})`;
+
+    showSadEmoji();
   }
 
-  noBtn.addEventListener("touchstart", moveNo);
+  function showSadEmoji() {
+    // Keep max 5 emojis
+    if (sadEmojis.length >= 5) {
+      const old = sadEmojis.shift();
+      old.remove();
+    }
+
+    const sad = document.createElement("div");
+    sad.className = "sad";
+
+    // Pick random sad emoji
+    sad.innerHTML = sadFaces[Math.floor(Math.random() * sadFaces.length)];
+
+    // Random position
+    sad.style.left = Math.random() * 90 + "vw";
+    sad.style.top = Math.random() * 80 + "vh";
+
+    // Random size for variation
+    sad.style.fontSize = (22 + Math.random() * 14) + "px";
+
+    document.body.appendChild(sad);
+    sadEmojis.push(sad);
+
+    // Remove after animation
+    setTimeout(() => {
+      sad.remove();
+      sadEmojis = sadEmojis.filter(e => e !== sad);
+    }, 2500);
+  }
+
   noBtn.addEventListener("mouseover", moveNo);
+  noBtn.addEventListener("touchstart", moveNo);
 
   function yesClicked() {
-    document.getElementById("result").style.display = "block";
+    document.getElementById("question").style.display = "none";
+    document.getElementById("yesBtn").style.display = "none";
     noBtn.style.display = "none";
+
+    document.getElementById("result").style.display = "block";
     startHearts();
   }
 
@@ -120,6 +171,7 @@
     }, 300);
   }
 </script>
+
 
 </body>
 </html>
