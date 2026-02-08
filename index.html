@@ -84,6 +84,26 @@
     from { opacity: 1; transform: translateY(0); }
     to { opacity: 0; transform: translateY(-40px); }
   }
+  
+	.sad-float {
+	  position: fixed;
+	  bottom: -20px;
+	  font-size: 26px;
+	  animation: sadFloat 4s linear forwards;
+	  pointer-events: none;
+	  z-index: 1;
+	}
+
+	@keyframes sadFloat {
+	  from {
+		transform: translateY(0);
+		opacity: 1;
+	  }
+	  to {
+		transform: translateY(-110vh);
+		opacity: 0;
+	  }
+}
 </style>
 </head>
 
@@ -101,11 +121,9 @@
 
 <script>
   const noBtn = document.getElementById("noBtn");
+  let sadInterval = null;
 
-  // Different sad emojis
   const sadFaces = ["😢", "😭", "🥺", "😞", "💔"];
-
-  let sadEmojis = [];
 
   function moveNo() {
     // Move NO button
@@ -115,43 +133,36 @@
     noBtn.style.top = y + "px";
     noBtn.style.transform = `scale(${Math.random() * 0.5 + 0.6})`;
 
-    showSadEmoji();
+    startSadFlow();
   }
 
-  function showSadEmoji() {
-    // Keep max 5 emojis
-    if (sadEmojis.length >= 5) {
-      const old = sadEmojis.shift();
-      old.remove();
-    }
+  function startSadFlow() {
+    if (sadInterval) return; // already flowing
 
-    const sad = document.createElement("div");
-    sad.className = "sad";
+    sadInterval = setInterval(() => {
+      for (let i = 0; i < 3; i++) {
+        const sad = document.createElement("div");
+        sad.className = "sad-float";
+        sad.innerHTML = sadFaces[Math.floor(Math.random() * sadFaces.length)];
+        sad.style.left = Math.random() * 100 + "vw";
+        sad.style.fontSize = (22 + Math.random() * 12) + "px";
+        document.body.appendChild(sad);
 
-    // Pick random sad emoji
-    sad.innerHTML = sadFaces[Math.floor(Math.random() * sadFaces.length)];
-
-    // Random position
-    sad.style.left = Math.random() * 90 + "vw";
-    sad.style.top = Math.random() * 80 + "vh";
-
-    // Random size for variation
-    sad.style.fontSize = (22 + Math.random() * 14) + "px";
-
-    document.body.appendChild(sad);
-    sadEmojis.push(sad);
-
-    // Remove after animation
-    setTimeout(() => {
-      sad.remove();
-      sadEmojis = sadEmojis.filter(e => e !== sad);
-    }, 2500);
+        setTimeout(() => sad.remove(), 4000);
+      }
+    }, 600);
   }
 
   noBtn.addEventListener("mouseover", moveNo);
   noBtn.addEventListener("touchstart", moveNo);
 
   function yesClicked() {
+    // Stop sad emojis
+    if (sadInterval) {
+      clearInterval(sadInterval);
+      sadInterval = null;
+    }
+
     document.getElementById("question").style.display = "none";
     document.getElementById("yesBtn").style.display = "none";
     noBtn.style.display = "none";
@@ -171,6 +182,7 @@
     }, 300);
   }
 </script>
+
 
 
 </body>
